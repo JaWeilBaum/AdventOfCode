@@ -1,17 +1,4 @@
-use std::fs::File;
-use std::io::prelude::*;
-
-fn get_file_str() -> String {
-    let mut file = File::open("./src/files/day01_0_input").expect("POOF");
-    let mut content = String::new();
-    file.read_to_string(&mut content).expect("POOF");
-    return content
-}
-
-
-pub fn run_01() {
-    let content= get_file_str();
-
+pub fn run_01(content: String) {
     let parts = content.split("\n");
     let mut previous_measurement: i32 = i32::MAX;
     let mut increased_counter = 0;
@@ -34,11 +21,8 @@ pub fn run_01() {
     println!("Total increases: {}", increased_counter);
 }
 
-pub fn run_02() {
-
+pub fn run_02(content: String) {
     let mut increased_counter = 0;
-
-    let content = get_file_str();
 
     let lines = content
         .split("\n")
