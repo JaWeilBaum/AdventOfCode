@@ -1,20 +1,20 @@
-mod day_07;
+mod day_08;
 mod utils;
 
 fn main() {
-    let content = utils::get_file_str(String::from("./src/files/day07_input.txt"));
+    let content = utils::get_file_str(String::from("./src/files/day08_input.txt"));
     // let content =  String::from("16,1,2,0,4,2,7,1,2,14");
 
     let start_1 = std::time::Instant::now();
 
-    day_07::run_01(content.clone());
+    // day_08::run_01(content.clone());
 
     let end_1 = std::time::Instant::now();
 
 
     let start_2 = std::time::Instant::now();
 
-    day_07::run_02(content.clone());
+    day_08::run_02(content.clone());
 
     let end_2 = std::time::Instant::now();
 
