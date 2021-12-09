@@ -40,6 +40,8 @@ pub fn run_02(content: String) {
         .map(|x| String::from(x))
         .collect::<Vec<String>>();
 
+    let mut total_result = 0;
+
     for line in lines {
 
         let input_output = line
@@ -49,52 +51,74 @@ pub fn run_02(content: String) {
 
         let mut inputs = input_output[0]
             .split(" ")
-            .map(|x| (String::from(x), x.len()))
+            .map(|x| (String::from(x).chars().sorted().collect::<String>(), x.len()))
             .collect::<Vec<(String, usize)>>();
 
-        inputs.sort_by_key(|x| x.1);
+        let one = inputs.clone()
+            .into_iter().filter(|x| x.1 == 2).last().unwrap().0;
+        let seven = inputs.clone()
+            .into_iter().filter(|x| x.1 == 3).last().unwrap().0;
+        let four = inputs.clone()
+            .into_iter().filter(|x| x.1 == 4).last().unwrap().0;
+        let eight = inputs.clone()
+            .into_iter().filter(|x| x.1 == 7).last().unwrap().0;
 
-        /**
-         1
-        0 2
-         3
-        4 6
-         5
-        **/
+        let five_elements = inputs.clone()
+            .into_iter().filter(|x| x.1 == 5).collect_vec();
 
-        let mut digit = [' ',' ',' ',' ',' ',' ',' '];
-        let mut chars_done: Vec<char> = vec![];
+        let six_elements = inputs.clone()
+            .into_iter().filter(|x| x.1 == 6).collect_vec();
 
-        let two = inputs
-            .iter().filter(|x| x.1 == 2).last().unwrap().0.chars().collect::<Vec<char>>();
+        let three = five_elements.clone()
+            .into_iter().filter(|x| one.chars().into_iter().all(|y| x.0.contains(y))).last().unwrap().0;
 
-        digit[2] = two[0];
-        digit[6] = two[1];
+        let nine = six_elements.clone()
+            .into_iter().filter(|x| four.chars().into_iter().all(|y| x.0.contains(y))).last().unwrap().0;
 
-        chars_done.push(two[0]);
-        chars_done.push(two[1]);
+        let zero = six_elements.clone()
+            .into_iter().filter(|x| one.chars().into_iter().all(|y| x.0.contains(y)) && !four.chars().into_iter().all(|y| x.0.contains(y))).last().unwrap().0;
 
-        let three = inputs
-            .iter().filter(|x| x.1 == 3).last().unwrap().0.chars().collect::<Vec<char>>()
-            .into_iter().filter(|x| !chars_done.contains(x)).collect::<Vec<char>>();
+        let six = six_elements.clone()
+            .into_iter().filter(|x| x.0 != nine && x.0 != zero).last().unwrap().0;
 
-        digit[1] = three[0];
+        let five = five_elements.clone()
+            .into_iter().filter(|x| x.0 != three && nine.chars().into_iter().filter(|&y| x.0.contains(y)).count() == 5).last().unwrap().0;
 
-        chars_done.push(three[0]);
+        let two = five_elements.clone().
+            into_iter().filter(|x| x.0 != three && x.0 != five).last().unwrap().0;
 
-        let four = inputs
-            .iter().filter(|x| x.1 == 4).last().unwrap().0.chars().collect::<Vec<char>>()
-            .into_iter().filter(|x| !chars_done.contains(x)).collect::<Vec<char>>();
-        println!("{:?}", four);
+        println!("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}", zero, one, two, three, four, five, six, seven, eight, nine);
 
-        println!("{:?}", digit);
+        let mapping = vec![
+            (0, zero),
+            (1, one),
+            (2, two),
+            (3, three),
+            (4, four),
+            (5, five),
+            (6, six),
+            (7, seven),
+            (8, eight),
+            (9, nine)
+        ];
+
+        let mut output = input_output[1]
+            .split(" ")
+            .map(|x| String::from(x).chars().sorted().collect::<String>())
+            .map(|x| mapping.clone().into_iter().filter(|y| y.1 == x).last().unwrap().0)
+            .collect_vec();
 
 
-        
+        let mut size = 1;
+        let mut result = 0;
 
+        for value in output.iter().rev() {
+            result += value * size;
+            size *= 10;
+        }
 
-        println!("[In]: {} [Out]: {}", input_output[0], input_output[1]);
-        println!("{:?}", inputs);
+        println!("Output: {}", result);
+        total_result += result;
     }
-    // println!("Counter: {}", counter)
+    println!("Counter: {}", total_result);
 }
