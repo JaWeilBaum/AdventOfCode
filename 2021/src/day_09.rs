@@ -8,19 +8,6 @@ pub fn run_01(content: String) {
         .map(|x| String::from(x).chars().map(|x| String::from(x).parse::<u8>().unwrap()).collect_vec())
         .collect_vec();
 
-    let mut minimums = 0;
-
-    /**
-    012345
-    1
-    2
-    3
-    4
-    5
-    **/
-
-    // let mut counter: Vec<Vec<i32>> = vec![vec![0;10];5];
-
     let mut risk_counter = 0;
 
     for y in 0..numbers.len() {
@@ -46,15 +33,9 @@ pub fn run_01(content: String) {
                 lower_counter += (numbers[y][x] < numbers[y][x + 1]) as i32;
                 lower_counter += (numbers[y][x] < numbers[y][x - 1]) as i32;
             }
-
-            // counter[y][x] = lower_counter;
             risk_counter += (lower_counter == 4) as i32 * (numbers[y][x] + 1) as i32;
         }
     }
-
-    /* for row in counter {
-        println!("{:?}", row);
-    }*/
 
     println!("Risklevel: {}", risk_counter);
 }
@@ -76,8 +57,7 @@ fn get_next(zero_indices: &Vec<(usize, usize)>, current_index: (usize, usize)) -
     return return_vec;
 }
 
-/// Not fast but efficient
-///
+/// Not fast but its working
 pub fn run_02(content: String) {
     let numbers = content
         .split("\n")
@@ -94,14 +74,10 @@ pub fn run_02(content: String) {
             if number == 0 {
                 zero_indices.push((y, x))
             }
-            print!("{}", number);
         }
-        println!();
     }
 
-
     let mut basin_size: Vec<i32> = vec![];
-    println!("{:?}", zero_indices);
 
     while zero_indices.len() > 0 {
         let mut basin_indexes: Vec<(usize, usize)> = vec![];
@@ -135,9 +111,7 @@ pub fn run_02(content: String) {
         zero_indices = zero_indices.into_iter().filter(|x| !basin_indexes.contains(x)).collect_vec();
     }
 
-
     basin_size = basin_size.into_iter().sorted().rev().collect_vec();
 
-    println!("Basi sizes: {:?}", basin_size);
     println!("Answer: {:?}", basin_size[0] * basin_size[1] * basin_size[2])
 }
