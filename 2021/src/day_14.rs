@@ -64,7 +64,7 @@ pub fn run_01(content: String) {
 
 
 /**
-== Initial ==== Second ====
+== Initial === 1. Round ====
 CH = 0          CH = 1
 CB = 1          CB = 0
 HH = 0          HH = 0
