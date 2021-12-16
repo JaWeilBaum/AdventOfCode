@@ -247,7 +247,7 @@ pub fn run_02(content: String) {
     let mut visited_points: Vec<Point> = vec![];
 
     let mut round = 0;
-    while true {
+    loop {
         if round % 1000 == 0 {
             let next_point = next_points.iter().last().unwrap();
             println!("Round: {} num_next_points: {} distance: {}", round, next_points.len(), distance_to(&(next_point.y, next_point.x), &target));
