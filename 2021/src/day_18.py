@@ -11,8 +11,15 @@ class Element:
         return "".join([" " for _ in range(self.depth - 1)]) + str(self.value)
 
 
+def explode_depth(element_list: list[Element]) -> (int, int):
+    elements_to_explode = list(sorted(list(filter(lambda x: x[1].depth > 4, enumerate(element_list))), key=lambda x: x[0]))
+    if len(elements_to_explode) == 0:
+        return -1, -1
+    return elements_to_explode[0][1].depth, elements_to_explode[0][0]
+
+
 def explode(element_list: list[Element]) -> bool:
-    elements_to_explode = list(filter(lambda x: x[1].depth > 4, enumerate(element_list)))
+    elements_to_explode = list(sorted(list(filter(lambda x: x[1].depth > 4, enumerate(element_list))), key=lambda x: x[1].depth, reverse=True))
 
     num_chunks = min(1, int(len(elements_to_explode) / 2))
     num_index_popped = 0
@@ -28,7 +35,11 @@ def explode(element_list: list[Element]) -> bool:
             num_index_popped += 1
             element_list.pop(right_idx - num_index_popped)
             num_index_popped += 1
-            element_list.insert(0, Element(value=0, depth=element_list[right_idx].depth + 1))
+            if element_list[right_idx + 1 - num_index_popped].depth == element_list[right_idx + 1 - num_index_popped + 1].depth:
+                new_depth_param = -1
+            else:
+                new_depth_param = 0
+            element_list.insert(0, Element(value=0, depth=element_list[right_idx + 1 - num_index_popped].depth + new_depth_param))
             num_index_popped -= 1
         elif right_idx == len(element_list) - 1:
             print("No explode since last element")
@@ -37,11 +48,15 @@ def explode(element_list: list[Element]) -> bool:
             num_index_popped += 1
             element_list.pop(right_idx - num_index_popped)
             num_index_popped += 1
-            element_list.append(Element(value=0, depth=element_list[left_idx - num_index_popped].depth + 1))
-            num_index_popped += 1
+            if element_list[left_idx - num_index_popped].depth < left_element.depth:
+                new_depth_param = -1
+            else:
+                new_depth_param = 1
+            element_list.append(Element(value=0, depth=element_list[left_idx - num_index_popped].depth))
+            num_index_popped -= 1
         else:
-            element_list[right_idx + 1].value += right_element.value
             element_list[left_idx - 1].value += left_element.value
+            element_list[right_idx + 1].value += right_element.value
             element_list.pop(left_idx - num_index_popped)
             num_index_popped += 1
             element_list.pop(right_idx - num_index_popped)
@@ -97,11 +112,12 @@ def get_data() -> str:
     # return "[[[[1,2],[3,4]],[[5,6],[7,8]]],9]"
     # return "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]"
     # return "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]"
-    return "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
+    # return "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
     # return "[[[[0,7],4],[7,[[8,4],9]]],[1,1]]"
     # return "[[6,[5,[4,[3,2]]]],1]"
     # return "[[6,[5,[[3,2],4]]],1]"
     # [[6,[8,[0,6]]],1]
+    return "[1,1]"
 
 
 def parse(input_str: str) -> list[Element]:
@@ -121,9 +137,28 @@ def parse(input_str: str) -> list[Element]:
 
 
 def step(input_list: list[Element]) -> bool:
-    explode_bool = explode(input_list)
-    split_bool = split(input_list)
-    return explode_bool or split_bool
+    explode_d, explode_index = explode_depth(input_list)
+    split_d, split_index = split_depth(input_list)
+
+    if split_index > explode_index:
+        return split(input_list)
+    elif split_index < explode_index:
+        return explode(input_list)
+    else:
+        if split_d > explode_d:
+            return split(input_list)
+        elif split_d < explode_d:
+            return explode(input_list)
+        else:
+            return False
+
+
+
+def split_depth(element_list: list[Element]) -> (int, int):
+    item_above_nine = list(filter(lambda x: x[1].value >= 10, enumerate(element_list)))
+    if len(item_above_nine) == 0:
+        return -1, -1
+    return item_above_nine[0][1].depth, item_above_nine[0][0]
 
 
 def split(input_list: list[Element]) -> bool:
@@ -139,18 +174,54 @@ def split(input_list: list[Element]) -> bool:
     return False
 
 
+def add(input_list: list[Element], new_list: list[Element]):
+    for e in input_list + new_list:
+        e.depth += 1
+
+    input_list.extend(new_list)
+
+
 def show_list(input_list: list[Element]):
     for e in input_list:
         print(e)
 
 
 def main():
-    one_line = get_data()
-    element_list = parse(one_line)
+    input = [
+        "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]",
+        "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]"
+    ]
 
-    while step(element_list):
-        print()
-        show_list(element_list)
+    default_list = parse(input[0])
+    # initial [[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # explode [[[[4,0],[5,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # explode [[[[4,0],[5,4]],[[0,[7,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # explode [[[[4,0],[5,4]],[[7,0],[15,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # split   [[[[4,0],[5,4]],[[7,0],[[7,8],5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # explode [[[[4,0],[5,4]],[[7,7],[0,13]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # split   [[[[4,0],[5,4]],[[7,7],[0,[6,7]]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]
+    # default_list = parse("[[[[[1,1],[2,2]],[3,3]],[4,4]],[5,5]]")
+    # after explode [[[[0,[3,2]],[3,3]],[4,4]],[5,5]]
+    # after explode [[[[3,0],[5,3]],[4,4]],[5,5]]
+    # default_list = parse("[[[[0,[1,[2,2]]]],2],3],4]")
+    # [[[[0,[1,[2,2]]],2],3],4]
+    # [[[[0,[3,0]],4],3],4]
+    # [[[[3,0],4],3],4]
+    # after explode "[[5,5],[[4,4],[[3,5],[3,0]]]]"
+    # after explode "[[5,5],[[4,4],[[3,5],[3,0]]]]"
+
+    for e in input[1:]:
+        # print(f"Input: {e}")
+        new_list = parse(e)
+        add(default_list, new_list)
+        show_list(default_list)
+        while step(default_list):
+            print()
+            show_list(default_list)
+            print("Done")
+            pass
+    print()
+    show_list(default_list)
 
 
 
