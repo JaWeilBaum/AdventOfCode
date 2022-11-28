@@ -17,12 +17,12 @@ func ReadTxtFile(fileName string) string {
 	return string(content)
 }
 
-func TxtFileToSliceOfStrings(content string, sep string) []string {
+func StringToSliceOfStrings(content string, sep string) []string {
 	return strings.Split(content, sep)
 }
 
-func TxtFileToSliceOfInt(content string, sep string) []int {
-	rows := TxtFileToSliceOfStrings(content, sep)
+func StringToSliceOfInt(content string, sep string) []int {
+	rows := StringToSliceOfStrings(content, sep)
 	var intValue = make([]int, 0)
 	for index, value := range rows {
 		if len(value) == 0 {
