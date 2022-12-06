@@ -1,13 +1,13 @@
 package main
 
 import (
-	"aoc/code/day05"
+	"aoc/code/day06"
 	"aoc/helper"
 )
 
 func main() {
-	inputData := helper.ReadTxtFile("day_05.txt")
-	inputDataSlice := helper.StringToSliceOfStrings(inputData, "\n")
-	day05.PartOne(inputDataSlice)
-	day05.PartTwo(inputDataSlice)
+	inputData := helper.ReadTxtFile("day_06.txt")
+	//inputDataSlice := helper.StringToSliceOfStrings(inputData, "\n")
+	day06.PartOne(inputData)
+	day06.PartTwo(inputData)
 }
