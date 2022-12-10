@@ -11,3 +11,9 @@ func Sum[V Number](input []V) V {
 	}
 	return V(result)
 }
+
+func Reverse(input []int) {
+	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
+		input[i], input[j] = input[j], input[i]
+	}
+}
