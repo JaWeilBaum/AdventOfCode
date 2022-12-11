@@ -17,3 +17,12 @@ func Reverse(input []int) {
 		input[i], input[j] = input[j], input[i]
 	}
 }
+
+func Contains[V comparable](slice []V, searchValue V) bool {
+	for _, value := range slice {
+		if value == searchValue {
+			return true
+		}
+	}
+	return false
+}
