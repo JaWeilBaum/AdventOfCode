@@ -1,11 +1,14 @@
 import re
 
+
 def main():
 
     with open("in_data/day_01.txt") as f:
         data = f.read()
 
+    part_one(data)
     part_two(data)
+
 
 def part_one(data: str):
     "".isdigit()
@@ -14,30 +17,6 @@ def part_one(data: str):
     rows = [int(f"{x[0]}{x[-1]}") for x in rows]
     print(rows)
     print(sum(rows))
-
-
-def _only_digit_from_str(input_str: str) -> str:
-    return "".join(list(filter(lambda x: x.isdigit(), input_str)))
-
-def str_to_digit_str(input_str: str) -> str:
-    lower_idx = 0
-    return_str = ""
-    for upper_idx in range(len(input_str) + 1):
-        print(f"{upper_idx} {return_str}")
-        part_str = input_str[lower_idx:upper_idx]
-        if len(part_str) == 1 and part_str.isdigit():
-            return_str += part_str
-            lower_idx = upper_idx
-            continue
-        conversion = _replace_str_with_digit(part_str)
-        print(f"{part_str} {conversion}")
-        if part_str != conversion:
-            lower_idx += 1
-            return_str += _only_digit_from_str(conversion)
-
-    # if lower_idx != upper_idx:
-
-    return return_str
 
 
 def _replace_str_with_digit(input_str: str) -> [(str, int)]:
@@ -70,6 +49,7 @@ def _replace_str_with_digit(input_str: str) -> [(str, int)]:
 
     return sorted(return_list, key=lambda x: x[1])
 
+
 def part_two(data: str):
     total = 0
     for row in data.split("\n"):
@@ -79,6 +59,6 @@ def part_two(data: str):
         total += int(f"{row_result[0][0]}{row_result[-1][0]}")
     print(total)
 
+
 if __name__ == '__main__':
     main()
-    # print(_replace_str_with_digit("zoneight234"))
