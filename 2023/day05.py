@@ -1,4 +1,7 @@
+import math
 from multiprocessing import Pool
+
+import numpy as np
 from tqdm import tqdm
 
 def main():
@@ -45,69 +48,39 @@ def part_one(raw_data: str):
     print(min(values))
 
 
-def resolve_overlap(base_mapping: list[dict], input_mapping: dict) -> list[dict]:
-    """
-                        0        1
-    mapping             |--------|
-                   0     1
-    input_mapping  |-----|
-
-    :param base_mapping:
-    :param input_mapping:
-    :return:
-    """
-    new_mappings = []
-    del_index_mappings = []
-    for mapping_idx, mapping in enumerate(base_mapping):
-        if mapping["range"][0] > input_mapping["range"][1] or mapping["range"][1] < input_mapping["range"][0]:
-            # input mapping is completely left or right of mapping
-            new_mappings.append(input_mapping)
-        elif mapping["range"][0] < input_mapping["range"][0] and mapping["range"][1] > input_mapping["range"][1]:
-            # input mapping is completely contained in
-            pass
-
-
-    return base_mapping + new_mappings
-
-
-
-def merge_mapping(base_mappings: list[dict], new_mappings: list[dict]) -> list[dict]:
-
-    for mapping in new_mappings:
-        resolve_overlap(base_mappings, mapping)
-        print()
-
-
-def process_range_and_mappings(pid: int, raw_input_range: tuple, mappings: list[list[dict]]) -> int:
-    input_range = list(range(raw_input_range[0], raw_input_range[0] + raw_input_range[1]))
-    with tqdm(total=len(mappings) * raw_input_range[1], leave=True, desc=f"PID: {pid}", position=pid + 1) as pbar:
-        for mapping in mappings:
-            for value_index, value in enumerate(input_range):
-                input_range[value_index] = map_number(value, mapping)
-                pbar.update(1)
-
-    return min(input_range)
-
 def part_two(raw_data: str):
+    # Just rewrite the ranges and split ranges if overlap occur
     rows = raw_data.split("\n\n")
-    values = parse_row(rows[0].replace("seeds: ", ""))
+    seeds = parse_row(rows[0].replace("seeds: ", ""))
 
-    value_groups = list(zip(values[::2], values[1::2]))
+    value_groups = list(zip(seeds[::2], seeds[1::2]))
+    value_groups = [(x[0], sum(x)) for x in value_groups]
 
-    mappings = [create_map(row) for row in rows[1:]]
+    for idx, row in enumerate(rows[1:]):
+        ranges = list(map(parse_row, row.splitlines()[1:]))
 
-    args = list(zip(range(len(value_groups)), value_groups, [mappings] * len(value_groups)))
+        new_value_groups = []
+        while len(value_groups) > 0:
+            start, end = value_groups.pop()
 
-    with Pool(processes=10) as pool:
+            for destination_start, source_start, range_length in ranges:
+                # Check overlap
+                overlap_start = max(start, source_start)
+                overlap_end = min(end, source_start + range_length)
+                if overlap_start < overlap_end:
+                    # Overlap is not empty as the start is smaller than the end
+                    new_value_groups.append((overlap_start - source_start + destination_start, overlap_end - source_start + destination_start))
+                    if overlap_start > start:
+                        value_groups.append((start, overlap_start))
+                    if end > overlap_end:
+                        value_groups.append((overlap_end, end))
+                    break
+            else:
+                new_value_groups.append((start, end))
+        value_groups = new_value_groups
 
-        return_values = pool.starmap(process_range_and_mappings, args)
-        print(min(return_values))
-    # values = process_range_and_mappings(0, value_groups[0], mappings)
-
-
-    print(min(values))
+    print(min(value_groups)[0])
 
 
 if __name__ == '__main__':
     main()
-    # print(resolve_overlap([{'add_value': -48, 'range': [98, 100]}, {'add_value': 2, 'range': [50, 98]}], {'add_value': 0, 'range': [0, 10]}))
