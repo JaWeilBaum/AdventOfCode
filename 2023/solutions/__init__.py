@@ -5,6 +5,7 @@ from .day04 import Day04
 from .day05 import Day05
 from .day06 import Day06
 from .day07 import Day07
+from .day08 import Day08
 
 
 FINISHED_DAYS = [
@@ -14,5 +15,6 @@ FINISHED_DAYS = [
     Day04,
     Day05,
     Day06,
-    Day07
+    Day07,
+    Day08
 ]
