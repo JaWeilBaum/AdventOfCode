@@ -7,6 +7,11 @@ from .day06 import Day06
 from .day07 import Day07
 from .day08 import Day08
 from .day09 import Day09
+from .day10 import Day10
+from .day11 import Day11
+from .day12 import Day12
+from .day13 import Day13
+from .day14 import Day14
 
 
 FINISHED_DAYS = [
@@ -18,5 +23,10 @@ FINISHED_DAYS = [
     Day06,
     Day07,
     Day08,
-    Day09
+    Day09,
+    # Day10,
+    Day11,
+    Day12,
+    Day13,
+    Day14
 ]

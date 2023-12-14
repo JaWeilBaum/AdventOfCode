@@ -40,7 +40,6 @@ class Day12(Day):
         """
         key = (pattern, pattern_idx, current_len)
         if key in self.cache.keys():
-            print("cache hit!")
             return self.cache[key]
         if pattern_idx == len(pattern) or len(groups) == group_idx:
             if group_idx == len(groups):
