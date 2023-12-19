@@ -73,10 +73,52 @@ class Day18(Day):
         return str(sum(values))
         pass
 
+    def create_vertices(self, instructions: list) -> list:
+        points = [(0, 0)]
+
+        x, y = 0, 0
+        for direction, distance in instructions:
+
+            if direction == 'D':
+                _x, _y = 0, 1
+            elif direction == 'R':
+                _x, _y = 1, 0
+            elif direction == 'L':
+                _x, _y = -1, 0
+            else:
+                _x, _y = 0, -1
+
+            x += _x * distance
+            y += _y * distance
+            if not (x == 0 and y == 0):
+                points.append((x, y))
+        return points
+
+    def shoe_lace(self, vertices: list) -> float:
+        values = []
+        distances = []
+        for (x1, y1), (x2, y2) in zip(vertices, vertices[1:] + vertices[0:1]):
+            distances.append(abs(x1 - x2) + abs(y1 - y2))
+            values.append((x1 * y2) - (y1 * x2))
+        length = sum(distances)
+        A = sum(values) * 0.5
+        I = A + 1 - length // 2
+        return I + length
+
     def part_two(self, raw_data: str) -> str:
-        pass
+        rows = [row.split()[-1].replace(')', '').replace('(#', '') for row in raw_data.splitlines()]
+
+        dirs = {0: 'R', 1: 'D', 2: 'L', 3: 'U'}
+
+        rows = [(dirs[int(row[-1])], int(row[:-1], 16)) for row in rows]
+        vertices = self.create_vertices(rows)
+
+        result = self.shoe_lace(vertices)
+        return str(int(result))
 
 
 
 if __name__ == '__main__':
-    Day18().run(False, True, False)
+    # too low
+    # 106941743548559
+    Day18().run(False, False, True)
