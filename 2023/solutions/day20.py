@@ -1,5 +1,5 @@
 from aoc import Day
-
+from collections import deque
 
 class Day20(Day):
 
@@ -57,25 +57,23 @@ class Day20(Day):
     def part_one(self, raw_data: str) -> str:
         self.modules = {key: value for key, value in map(self.parse_module, raw_data.splitlines())}
         self.create_memory()
-        self.modules["output"] = {"type": "", "destinations": []}
+        self.modules["rx"] = {"type": "", "destinations": []}
         l = 0
         h = 0
+        queue = deque()
 
         for i in range(1000):
             print(f"Pressing button {i + 1}")
-            queue = [('button', 'l', 'broadcaster')]
+            queue.append(('button', 'l', 'broadcaster'))
             while len(queue) > 0:
-                prev_node, pulse, next_node = queue.pop(0)
-                new_queue_values = []
+                prev_node, pulse, next_node = queue.popleft()
                 # print(f"{prev_node} -{pulse}-> {next_node}")
                 if pulse == 'l':
                     l += 1
                 else:
                     h += 1
                 if next_module := self.modules.get(next_node):
-
-
-
+                    new_queue_values = []
                     if next_module["type"] == 'b':
                         new_queue_values = list(list(map(lambda x: (next_node, pulse, x), self.modules[next_node]['destinations'])))
                     elif next_module["type"] == 'f':
@@ -83,7 +81,8 @@ class Day20(Day):
                     elif next_module["type"] == 'c':
                         new_queue_values = list(list(map(lambda x: (next_node, *x), self.process_conjunction(pulse, prev_node, next_node))))
 
-                    queue.extend(new_queue_values)
+                    for v in new_queue_values:
+                        queue.append(v)
 
         # print(self.process_conjunction('l', 'c', 'inv'))
 
@@ -96,6 +95,7 @@ class Day20(Day):
 
 
 if __name__ == '__main__':
+    # To low:
     # 850885266
-    # To low: 735050423
+    # 735050423
     Day20().run(False,  True, False)
