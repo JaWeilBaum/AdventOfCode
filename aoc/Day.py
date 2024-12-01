@@ -4,7 +4,8 @@ from pathlib import Path
 
 class Day(ABC):
 
-    def __init__(self, day: int):
+    def __init__(self, day: int, year: int=2023):
+        self.year = str(year)
         self.day = f"{day:0>2}"
         self.file_name = f"day_{self.day}.txt"
         self.demo_file_name = f"day_{self.day}_demo.txt"
@@ -18,7 +19,7 @@ class Day(ABC):
         return f"Day {self.day}"
 
     def load_file(self, name: str) -> str:
-        with open(self.base_path.parent / "in_data" / name) as f:
+        with open(self.base_path.parent / self.year / "in_data" / name) as f:
             return f.read()
 
     def p1(self) -> str:
