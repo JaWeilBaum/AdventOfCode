@@ -1,6 +1,8 @@
 from functools import cmp_to_key
 
+from fontTools.misc.psOperators import ps_object
 from mpmath import matrix
+from s3transfer.compat import seekable
 
 from aoc import Day
 
@@ -8,44 +10,55 @@ class Day06(Day):
 
     def __init__(self):
         super().__init__(year=2024, day=6)
-        self.matrix = []
+        self.grid = {}
 
-    def _find_start(self) -> (int, int):
-        for y, row in enumerate(self.matrix):
-            if "^" in row:
-                return row.index("^"), y
-
-    def _valid_coord(self, x, y) -> bool:
-        return 0 <= y < len(self.matrix) and x < len(self.matrix[y])
+    def _create_grid(self, data: str):
+        self.grid = {
+            y+x*1j: value for y, row in enumerate(data.splitlines()) for x, value in enumerate(row.strip())
+        }
 
     def part_one(self, data: str):
-        self.matrix = [list(x) for x in data.splitlines()]
+        self._create_grid(data)
 
-        s_x, s_y = self._find_start()
+        visited_locations = self._walk_grid(self.grid)[0]
 
-        directions = ["U", "R", "D", "L"]
-        steps = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        return f"{len(visited_locations)}"
 
-        direction = directions[0]
+    def _get_start_location(self):
+        return min(loc for loc in self.grid if self.grid[loc] == "^")
+
+    def _walk_grid(self, grid: dict) -> (set, bool):
+        start_loc = self._get_start_location()
+
+        direction = -1  # UP
+        dir_change = -1j  # Turn Right
+        position = start_loc
         visited_locs = set()
 
-        while True:
-            print(s_x, s_y)
-            visited_locs.add(f"{s_x}#{s_y}")
-            _x, _y = steps[directions.index(direction)]
-            if not self._valid_coord(s_x + _x, s_y + _y):
-                break
-            if self.matrix[_y + s_y][_x + s_x] == "#":
-                direction = directions[(directions.index(direction) + 1) % len(directions)]
+        while position in grid and (position, direction) not in visited_locs:
+            visited_locs.add((position, direction))
+            if grid.get(position + direction) == "#":
+                direction *= dir_change
             else:
-                s_x += _x
-                s_y += _y
+                position += direction
 
-        return f"{len(visited_locs)}"
+        return {loc for loc, _ in visited_locs}, (position, direction) in visited_locs
 
     def part_two(self, data: str):
+        self._create_grid(data)
+        visited_locs = self._walk_grid(self.grid)[0]
+        start_loc = self._get_start_location()
 
-        return f""
+        results = []
+
+        for possible_loc in visited_locs:
+            if possible_loc == start_loc:
+                continue
+            _g = self.grid.copy()
+            _g[possible_loc] = '#'
+            results.append(self._walk_grid(_g)[1])
+
+        return f"{sum(results)}"
 
 if __name__ == '__main__':
-    Day06().run(demo=False, part_one=True, part_two=True)
+    Day06().run(demo=False, part_one=False, part_two=True)
