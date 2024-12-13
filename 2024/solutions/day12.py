@@ -64,7 +64,12 @@ class Day12(Day):
 
     def create_fences(self, elements: dict, factor: int = 2) -> dict:
         directions = [(1, '-'), (-1, '-'), (1j, '|'), (-1j, '|')]
-
+        corner_stones = [
+            ([ 1, -1j],  1 -1j),
+            ([-1, -1j], -1 -1j),
+            ([-1,  1j], -1 +1j),
+            ([ 1,  1j],  1 +1j),
+        ]
 
         output_fences = {}
 
@@ -74,6 +79,11 @@ class Day12(Day):
                 new_pos = element + direction
                 if (new_pos not in elements):
                     output_fences[(new_pos * factor) - direction] = fence_letter
+
+                for check_locations, corner_stone_location in corner_stones:
+                    if all([(element + d not in elements) for d in check_locations]):
+                        output_fences[(element * factor) + corner_stone_location] = '+'
+
 
         return output_fences
 
@@ -100,6 +110,45 @@ class Day12(Day):
 
             print()
 
+    def get_grid_rows(self, grid: dict, rows: bool=False, columns: bool=False) -> int:
+        min_x, min_y, max_x, max_y = self.grid_size(grid)
+
+        data = []
+
+        for y in range(min_y, max_y):
+            row = []
+            for x in range(min_x, max_x):
+                loc = y + x*1j
+                if value := grid.get(loc):
+                    row.append(value)
+                else:
+                    row.append(' ')
+            data.append(row)
+
+        if rows:
+            new_data = [''.join(row).strip().split('+') for row in data]
+        if columns:
+            new_data = []
+            for col_idx in range(len(data[0])):
+                new_row = []
+                for row_idx in range(len(data)):
+                    new_row.append(data[row_idx][col_idx])
+                new_data.append(''.join(new_row).strip().split('+'))
+
+        fences = []
+        for row in new_data:
+            for element in row:
+                if len(element.strip()) == 0:
+                    continue
+                potential_elements = element.split('  ')
+                for p_element in potential_elements:
+                    if len(p_element.strip()) == 0:
+                        continue
+                    fences.append(p_element.strip())
+
+        return len(fences)
+
+
     def part_one(self, data: str):
 
         grid = self.create_grid(data)
@@ -113,78 +162,26 @@ class Day12(Day):
 
         return f"{sum(price)}"
 
-    def consolidate_fences(self, fences: dict) -> int:
-        fences_locations = [x for x in fences.items()]
-
-        expected_element = {
-            "-": [1j, -1j],
-            "|": [ 1,  -1]
-        }
-
-        c_fences = []
-
-        while len(fences_locations) > 0:
-            location, direction  = fences_locations.pop(0)
-            tmp_c_fence = [location]
-            for diff in expected_element[direction]:
-                new_element_found = True
-                counter = 1
-                while new_element_found:
-                    new_element_found = False
-                    potential_location = location + (counter * diff * 2)
-                    if (potential_location in fences) and (direction == fences[potential_location]):
-                        tmp_c_fence.append(potential_location)
-                        fences_locations.remove((potential_location, direction))
-                        new_element_found = True
-                    counter += 1
-            c_fences.append(tmp_c_fence)
-
-        return len(c_fences)
+    def num_fences(self, fence: dict) -> int:
+        row_walls = self.get_grid_rows({k: v for k, v in fence.items() if v in ['-', '+']}, rows=True)
+        col_walls = self.get_grid_rows({k: v for k, v in fence.items() if v in ['|', '+']}, columns=True)
+        return row_walls + col_walls
 
     def part_two(self, data: str):
-        data = """AAAAAA
-AAABBA
-AAABBA
-ABBAAA
-ABBAAA
-AAAAAA"""
+
         grid = self.create_grid(data)
         fields = self.discover_fields(grid)
-        print()
 
         price = []
 
-        A_field = fields["A"][0]
-
-        fence = self.create_fences(A_field, factor=2)
-        self.print_grid({x: "A" for x in A_field})
-        print()
-        self.print_grid({k: v for k,v in fence.items() if v == '|'}, filter_y=True)
-        print()
-        self.print_grid({k: v for k,v in fence.items() if v == '-'}, filter_x=True)
-
-        # Filter the expanded filed and in the other direction of fences
-        # For every row / column count the number of fences which are there
-
-
         for key, vals in fields.items():
             for val in vals:
-                fences = self.create_fences(val)
-                num_fences = self.consolidate_fences(fences)
-
-                print(f"{key} {len(val) * num_fences} ({num_fences=})")
+                fence = self.create_fences(val, factor=2)
+                num_fences = self.num_fences(fence)
                 price.append(len(val) * num_fences)
 
-        print()
         return f"{sum(price)}"
-    # In the example above the walls are consolidated which should not be consolidated.
-    #
-    # A |
-    # A v
-    # - + -
-    #   ^ A
-    #   | A
-    # 835520 -> too low
+
 
 if __name__ == '__main__':
-    Day12().run(demo=False, part_one=False, part_two=True)
+    Day12().run(demo=True, part_one=False, part_two=True)
